@@ -16,13 +16,14 @@
                 </a>
             </li>
             <li style="margin-bottom: 20px;">
-                <a href="manage_accidents.php"
+                <a href="user_approval.php"
                     style="text-decoration: none; color: #333; display: flex; align-items: center;">
-                    <i class="fas fa-exclamation-triangle" style="margin-right: 10px;"></i> จัดการสาเหตุอุบัติเหตุ
+                    <i class="fas fa-user-check" style="margin-right: 10px;"></i> อนุมัติผู้ใช้งาน
                 </a>
             </li>
+
             <li style="margin-bottom: 20px;">
-                <a href="accident_reports.php"
+                <a href="accident_report.php"
                     style="text-decoration: none; color: #333; display: flex; align-items: center;">
                     <i class="fas fa-file-alt" style="margin-right: 10px;"></i> รายงานอุบัติเหตุ
                 </a>

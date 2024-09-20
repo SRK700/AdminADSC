@@ -29,8 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['loggedin'] = true;
         $_SESSION['email'] = $email;
         $loginStatus = 'success';
-        header('Location: dashboard.php');
-        exit;
     } else {
         $loginStatus = 'error';
     }
@@ -48,6 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
     body {
         background-color: #f0f2f5;
@@ -97,10 +97,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         top: calc(50% - 0.5em);
         color: #aaa;
     }
-
-    .alert {
-        margin-top: 20px;
-    }
     </style>
 </head>
 
@@ -109,11 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="card p-4">
             <img src="img/Logo.png" alt="ADSC Logo">
             <h3 class="card-title">ADSC Admin</h3>
-            <?php if ($loginStatus === 'error'): ?>
-            <div class="alert alert-danger">
-                อีเมลหรือรหัสผ่านไม่ถูกต้อง
-            </div>
-            <?php endif; ?>
             <form action="login.php" method="POST">
                 <div class="form-group position-relative">
                     <input type="email" name="email" class="form-control" placeholder="อีเมล" required>
@@ -130,6 +121,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
     // Toggle password visibility
     $(document).ready(function() {
@@ -139,6 +133,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             password.attr("type", type);
             $(this).toggleClass("fa-eye-slash");
         });
+
+        <?php if ($loginStatus === 'success'): ?>
+        Swal.fire({
+            icon: 'success',
+            title: 'เข้าสู่ระบบสำเร็จ!',
+            showConfirmButton: false,
+            timer: 1500
+        }).then(() => {
+            window.location.href = 'dashboard.php';
+        });
+        <?php elseif ($loginStatus === 'error'): ?>
+        Swal.fire({
+            icon: 'error',
+            title: 'เข้าสู่ระบบล้มเหลว!',
+            text: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+        });
+        <?php endif; ?>
     });
     </script>
 </body>

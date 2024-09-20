@@ -1,3 +1,11 @@
+<?php
+session_start();
+if (!isset($_SESSION['loggedin'])) {
+    header('Location: login.php');
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="th">
 
@@ -104,37 +112,21 @@
     }
 
     .status select {
-        width: 100px;
+        width: 120px;
         padding: 5px;
         background-color: #fff;
         border: 1px solid #ddd;
         border-radius: 5px;
     }
 
-    .status select.option-รออนุมัติ {
-        background-color: #FFC107;
-    }
-
-    .status select.option-อนุมัติ {
-        background-color: #4CAF50;
-    }
-
-    .status select.option-ระงับ {
-        background-color: #F44336;
-    }
-
-    .actions button {
-        background-color: #6b4df2;
-        border: none;
+    .status-approved {
+        background-color: #4CAF50 !important;
         color: white;
-        padding: 8px 12px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 14px;
-        border-radius: 5px;
-        margin: 2px;
-        cursor: pointer;
+    }
+
+    .status-suspended {
+        background-color: #F44336 !important;
+        color: white;
     }
     </style>
 </head>
@@ -237,17 +229,18 @@
                 users.forEach(user => {
                     const row = document.createElement('tr');
 
+                    const statusOptions = `
+                        <select class="status-select ${user.status === 'อนุมัติ' ? 'status-approved' : 'status-suspended'}"
+                                onchange="changeStatus(${user.user_id}, this)">
+                            <option value="อนุมัติ" ${user.status === 'อนุมัติ' ? 'selected' : ''}>อนุมัติ</option>
+                            <option value="ระงับ" ${user.status === 'ระงับ' ? 'selected' : ''}>ระงับ</option>
+                        </select>`;
+
                     row.innerHTML = `
                             <td>${user.first_name} ${user.last_name}</td>
                             <td>${user.gender}</td>
                             <td>${user.agency || 'N/A'}</td>
-                            <td class="status">
-                                <select onchange="changeStatus(${user.user_id}, this.value)" class="status-select ${'option-' + user.status}">
-                                    <option value="รออนุมัติ" ${user.status === 'รออนุมัติ' ? 'selected' : ''}>รออนุมัติ</option>
-                                    <option value="อนุมัติ" ${user.status === 'อนุมัติ' ? 'selected' : ''}>อนุมัติ</option>
-                                    <option value="ระงับ" ${user.status === 'ระงับ' ? 'selected' : ''}>ระงับ</option>
-                                </select>
-                            </td>
+                            <td class="status">${statusOptions}</td>
                             <td>${user.created_at}</td>
                             <td class="actions">
                                 <button onclick="editUser(${user.user_id})">แก้ไข</button>
@@ -261,8 +254,19 @@
             .catch(error => console.error('Error fetching users:', error));
     });
 
-    // ฟังก์ชันสำหรับเปลี่ยนแปลงสถานะผู้ใช้
-    function changeStatus(userId, newStatus) {
+    // ฟังก์ชันเปลี่ยนสถานะ
+    function changeStatus(userId, selectElement) {
+        const newStatus = selectElement.value;
+
+        // เปลี่ยนสีตามสถานะ
+        if (newStatus === 'อนุมัติ') {
+            selectElement.classList.remove('status-suspended');
+            selectElement.classList.add('status-approved');
+        } else {
+            selectElement.classList.remove('status-approved');
+            selectElement.classList.add('status-suspended');
+        }
+
         fetch('http://localhost:81/AdminADSC/AdminAPI/UpdateUserStatus.php', {
                 method: 'PUT',
                 headers: {
@@ -277,7 +281,6 @@
             .then(data => {
                 if (data.message) {
                     alert(data.message);
-                    window.location.reload(); // รีเฟรชหน้าเว็บหลังจากอัปเดตสถานะ
                 } else {
                     alert('Error updating status');
                 }
@@ -285,12 +288,7 @@
             .catch(error => console.error('Error updating status:', error));
     }
 
-    // ฟังก์ชันสำหรับแก้ไขผู้ใช้
-    function editUser(userId) {
-        alert('Edit user with ID: ' + userId);
-    }
-
-    // ฟังก์ชันสำหรับลบผู้ใช้
+    // ฟังก์ชันลบผู้ใช้
     function deleteUser(userId) {
         if (confirm('Are you sure you want to delete this user?')) {
             fetch('http://localhost:81/AdminADSC/AdminAPI/AdminActionUser.php', {
